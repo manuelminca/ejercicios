@@ -2,5 +2,6 @@
 env
 env_ok
 clean_blobs_1
+clean_blobs_2
 metadata.json
 result.json
