@@ -1,0 +1,4 @@
+jupyter
+apache-beam[gcp]
+google-cloud-storage
+pandas
