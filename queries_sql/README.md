@@ -109,6 +109,14 @@ from
     inner join proyectos on proyectos.id = horas_macastre.project_id;
 ```
 
+
+Mi solución:
+```sql
+CREATE VIEW horas_ejemplo_macastre_manu as
+SELECT horas_macastre.employee_id AS employee_id, horas_macastre.project_id AS project_id, proyectos.name AS project_name, hours 
+FROM horas_macastre 
+INNER JOIN proyectos ON proyectos.id=horas_macastre.project_id;
+```
 #### pregunta 1
 
 Queremos una tabla `horas_nombre_macastre` que represente los datos de imputación de horas de Macastre con el mismo formato que los de Valencia, es decir, una tabla con estas columnas:
