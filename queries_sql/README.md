@@ -125,6 +125,16 @@ Queremos una tabla `horas_nombre_macastre` que represente los datos de imputaci�
 * project_name
 * hours
 
+
+Mi solución:
+```sql
+CREATE VIEW horas_nombre_macastre as
+SELECT empleados_macastre.name AS employee_name, proyectos.name AS project_name, hours 
+FROM horas_macastre 
+INNER JOIN proyectos ON proyectos.id=horas_macastre.project_id
+INNER JOIN empleados_macastre ON empleados_macastre.id=horas_macastre.employee_id;
+```
+
 #### pregunta 2
 
 Queremos una tabla `horas_empleados` que contenga *todos* los datos de imputación de horas, tanto de la oficina de Macastre como la de Valencia, y una columna que indique si la imputación procede de Valencia o Macastre:
