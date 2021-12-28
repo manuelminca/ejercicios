@@ -132,7 +132,8 @@ CREATE VIEW horas_nombre_macastre as
 SELECT empleados_macastre.name AS employee_name, proyectos.name AS project_name, hours 
 FROM horas_macastre 
 INNER JOIN proyectos ON proyectos.id=horas_macastre.project_id
-INNER JOIN empleados_macastre ON empleados_macastre.id=horas_macastre.employee_id;
+INNER JOIN empleados_macastre ON empleados_macastre.id=horas_macastre.employee_id
+ORDER BY employee_name;
 ```
 
 #### pregunta 2
@@ -163,6 +164,32 @@ pepe pepez       megayogur     10          Macastre
 pepe pepez       ultrayogur    5           Macastre
 ```
 
+Sub-query para Macastre:
+```sql
+SELECT employee_name, project_name, hours, 'Macastre' AS imputation from horas_nombre_macastre;
+```
+
+Sub-query para Valencia:
+```sql
+SELECT employee_name, project_name, hours, 'Valencia' AS imputation
+FROM horas_valencia;
+```
+
+Solución:
+```sql
+CREATE VIEW horas_empleados as
+
+SELECT employee_name, project_name, hours, 'Macastre' AS imputation from horas_nombre_macastre
+
+UNION
+
+SELECT employee_name, project_name, hours, 'Valencia' AS imputation
+FROM horas_valencia
+
+ORDER BY employee_name;
+```
+
+
 #### pregunta 3
 
 Queremos una tabla `costes_empleados` que añada una columna de euros a las horas trabajadas, usando la tabla `sueldos` para el cálculo; tendrá las siguientes columnas:
@@ -173,6 +200,16 @@ Queremos una tabla `costes_empleados` que añada una columna de euros a las hora
 * imputation
 * euros
 
+Solución:
+```sql
+CREATE VIEW costes_empleados as
+
+SELECT horas_empleados.employee_name, project_name, SUM(hours) AS hours, imputation, SUM(hours) * euros_hour AS euros
+FROM horas_empleados 
+INNER JOIN sueldos ON sueldos.employee_name=horas_empleados.employee_name
+GROUP BY horas_empleados.employee_name, imputation, project_name;
+```
+
 #### pregunta 4
 
 Queremos una tabla `costes_personal_region` que agregue todas las horas invertidas y los euros que han costado en cada región de imputación:
@@ -180,6 +217,14 @@ Queremos una tabla `costes_personal_region` que agregue todas las horas invertid
 * imputation
 * total_hours
 * total_euros
+
+Solución:
+```sql
+CREATE VIEW costes_personal_region as
+SELECT imputation, SUM(hours), SUM(euros)
+FROM costes_empleados
+GROUP BY imputation;
+```
 
 #### pregunta 5
 
@@ -201,4 +246,17 @@ megayogur     accelerato  11.0
 ultrayogur    Macastre    22.95
 ultrayogur    Valencia    12.6
 ultrayogur    accelerato  2.0
+```
+
+Solución:
+```sql
+CREATE VIEW costes_proyecto as
+SELECT project_name, imputation, SUM(euros)
+FROM costes_empleados
+GROUP BY imputation, project_name
+
+UNION 
+
+SELECT project_name, 'accelerator' AS imputation, SUM(euros) from acelerador_particulas
+GROUP BY project_name;
 ```
