@@ -55,7 +55,8 @@ def run(argv=None, save_main_session=True):
             blob_path = blob.metadata.path
             blob_name = 'blobs/' + blob_path.split('/blobs/')[1]
             check_name = blob_name.split('-')[0].split('/')[1]
-            
+            blob_file_name = blob_path.split('/blobs/')[1]
+
             gcloud_client = GcloudClient()
             temp_dir = gcloud_client.download_blob_from_bucket(blob_name)
             meta_path = os.path.join(temp_dir.name, "metadata.json")
@@ -67,23 +68,28 @@ def run(argv=None, save_main_session=True):
                 result = json.load(f)
 
             source_file_name = os.path.join(output_dir, blob_name)
-            target_location = os.path.join("clean_blobs_3/", source_file_name)
+            #target_location = os.path.join("gs://mapreduce-exercise-manuel", source_file_name)
             
             if meta['check_name'] != check_name:
                 meta['check_name'] = check_name
-                #We need to compress the blob and save it to the target directory
-                with open('metadata.json', 'w') as outfile:
-                    json.dump(meta, outfile)
-                with open('result.json', 'w') as outfile:
-                    json.dump(result, outfile)
-                with tarfile.open(source_file_name,"w:gz") as tar:
-                    tar.add(os.path.basename('metadata.json'))
-                    tar.add(os.path.basename('result.json'))
-        
-                gcloud_client.upload_blob_to_bucket(target_location, source_file_name)
-                print("Found wrong blob")
-            else:
-                gcloud_client.upload_blob_to_bucket(target_location, blob_name)
+
+                with TemporaryDirectory() as tmp_folder:
+                    #We need to compress the blob and save it to the target directory
+                    with open('metadata.json', 'w') as outfile:
+                        json.dump(meta, outfile)
+                    with open('result.json', 'w') as outfile:
+                        json.dump(result, outfile)
+
+                    with tarfile.open(tmp_folder + "/" + blob_file_name, "w:gz") as tar:
+                        tar.add(os.path.basename('metadata.json'))
+                        tar.add(os.path.basename('result.json'))
+                    
+                    gcloud_client.upload_blob_to_bucket(source_file_name, tmp_folder + "/" + blob_file_name)
+            #else:
+            #    print("################11111111111#################")
+            #    print(target_location, blob_name)
+            #    print("######################################")
+            #    gcloud_client.upload_blob_to_bucket(source_file_name, blob_name)
 
 
         readable_files = (
