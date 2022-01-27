@@ -32,12 +32,11 @@ def run(argv=None, save_main_session=True):
                 self.bucket = self.storage_client.get_bucket("mapreduce-exercise-manuel")
             
             def download_blob_from_bucket(self, blob_name):
-
                 # Create a blob object from the filepath
                 blob = self.bucket.blob(blob_name)
-                # Download the file to a destination
 
                 with NamedTemporaryFile() as f:
+                    # Download the file to a destination
                     blob.download_to_file(f)
                     f.flush()
 
@@ -70,26 +69,21 @@ def run(argv=None, save_main_session=True):
             source_file_name = os.path.join(output_dir, blob_name)
             #target_location = os.path.join("gs://mapreduce-exercise-manuel", source_file_name)
             
-            if meta['check_name'] != check_name:
-                meta['check_name'] = check_name
+            meta['check_name'] = check_name
 
-                with TemporaryDirectory() as tmp_folder:
-                    #We need to compress the blob and save it to the target directory
-                    with open('metadata.json', 'w') as outfile:
-                        json.dump(meta, outfile)
-                    with open('result.json', 'w') as outfile:
-                        json.dump(result, outfile)
+            with TemporaryDirectory() as tmp_folder:
+                #We need to compress the blob and save it to the target directory
+                with open('metadata.json', 'w') as outfile:
+                    json.dump(meta, outfile)
+                with open('result.json', 'w') as outfile:
+                    json.dump(result, outfile)
 
-                    with tarfile.open(tmp_folder + "/" + blob_file_name, "w:gz") as tar:
-                        tar.add(os.path.basename('metadata.json'))
-                        tar.add(os.path.basename('result.json'))
-                    
-                    gcloud_client.upload_blob_to_bucket(source_file_name, tmp_folder + "/" + blob_file_name)
-            #else:
-            #    print("################11111111111#################")
-            #    print(target_location, blob_name)
-            #    print("######################################")
-            #    gcloud_client.upload_blob_to_bucket(source_file_name, blob_name)
+                with tarfile.open(tmp_folder + "/" + blob_file_name, "w:gz") as tar:
+                    tar.add(os.path.basename('metadata.json'))
+                    tar.add(os.path.basename('result.json'))
+                
+                gcloud_client.upload_blob_to_bucket(source_file_name, tmp_folder + "/" + blob_file_name)
+
 
 
         readable_files = (
@@ -104,14 +98,17 @@ if __name__ == '__main__':
     run()
 
 
+"""
+export GOOGLE_APPLICATION_CREDENTIALS="/home/mminguez/Desktop/ejercicios/petabyte_transformations/staging_global_service_account"
+python -m dataflow \
+    --region europe-west1 \
+    --runner DataflowRunner \
+    --project staging-infra-240711 \
+    --temp_location gs://mapreduce-exercise-manuel/tmp/ \
+    --requirements_file dataflow_requirements.txt
 
-#export GOOGLE_APPLICATION_CREDENTIALS="/home/mminguez/Desktop/ejercicios/petabyte_transformations/staging_global_service_account"
-#python -m dataflow \
-#    --region europe-west1 \
-#    --runner DataflowRunner \
-#    --project staging-infra-240711 \
-#    --temp_location gs://mapreduce-exercise-manuel/tmp/ \
-#    --requirements_file dataflow_requirements.txt
+"""
+
 
 
 
