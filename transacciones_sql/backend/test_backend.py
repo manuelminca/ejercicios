@@ -4,6 +4,7 @@ import sqlite3
 from backend.savings_backend import init_db, create_user, get_credit, set_credit, transfer
 
 class Test(unittest.TestCase):
+    
     def test_basic_ops(self):
         conn = sqlite3.connect(':memory:')
         init_db(conn)
@@ -33,3 +34,17 @@ class Test(unittest.TestCase):
 
         with self.assertRaises(Exception):
             transfer(conn, 'pepe', 'paco', 1000)
+
+
+    #def test_light_cut(self):
+    #    conn = sqlite3.connect(':memory:')
+    #    conn.isolation_level = None
+    #    init_db(conn)
+    #
+    #    create_user(conn, 'pepe', 100)
+    #    create_user(conn, 'paco', 100)
+    #
+    #    transfer(conn, 'pepe', 'paco', 50)
+    #
+    #    self.assertEqual(get_credit(conn, 'pepe'), 100)
+    #    self.assertEqual(get_credit(conn, 'paco'), 100)

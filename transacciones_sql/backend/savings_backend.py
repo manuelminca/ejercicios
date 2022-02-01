@@ -18,15 +18,33 @@ def get_credit(conn, userid):
 
 def set_credit(conn, userid, amount):
     conn.execute("update savings set amount = ? where userid = ?", (amount, userid))
+    
+def set_credit_fail(conn, userid, amount):
+    print("in setcredit 2")
+    conn.execute("update savings set amount = ? where ssfg = ?", (amount, userid))
 
 def transfer(conn, user_a, user_b, transfer_amount):
-    user_a_credit = get_credit(conn, user_a)
-    assert user_a_credit >= transfer_amount
+    """
+    Apparently, running - END TRANSACTION; - before running the entire transaction appears to work.
+    I think that somehow, SQL thinks that a transaction is already occurring. 
+    Though, I'm not sure where exactly. So to stop it, you have to end the transaction first before proceeding with the course.
+    """
+    conn.execute("end")
+    try:
+        #here we start the transaction
+        conn.execute("begin")
+        user_a_credit = get_credit(conn, user_a)
+        assert user_a_credit >= transfer_amount
 
-    user_b_credit = get_credit(conn, user_b)
+        user_b_credit = get_credit(conn, user_b)
 
-    new_user_a_credit = user_a_credit - transfer_amount
-    set_credit(conn, user_a, new_user_a_credit)
+        new_user_a_credit = user_a_credit - transfer_amount
+        set_credit(conn, user_a, new_user_a_credit)
 
-    new_user_b_credit = user_b_credit + transfer_amount
-    set_credit(conn, user_b, new_user_b_credit)
+        new_user_b_credit = user_b_credit + transfer_amount
+        set_credit(conn, user_b, new_user_b_credit)
+
+    except conn.Error:
+        print("failed!")
+        conn.execute("rollback")
+        raise conn.Error

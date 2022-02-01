@@ -27,6 +27,9 @@ Creemos que el problema se encuentra en la función `savings_backend.transfer(co
 
 ¿Qué crees que está pasando?
 
+Lo que está pasando es que el usuario 1 está enviando el dinero, se hace la transacción de quitar el dinero en la cuenta al usuario 1 correctamente pero cuando
+va a insertar el dinero en el usuario 2 se pierde la conexión por la caída de la luz. Por lo que el primer usuario pierde el dinero y el segundo no lo recibe.
+
 #### pregunta 2
 
 ¿Cómo reescribirías la función `savings_backend.transfer(conn, user_a, user_b, transfer_amount)` para eliminar el bug sin tener que cambiar a un datacenter bueno?
