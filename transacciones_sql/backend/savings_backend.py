@@ -23,7 +23,7 @@ def set_credit_fail(conn, userid, amount):
     print("in setcredit 2")
     conn.execute("update savings set amount = ? where ssfg = ?", (amount, userid))
 
-def transfer(conn, user_a, user_b, transfer_amount):
+def transfer(conn, user_a, user_b, transfer_amount, fail=False):
     """
     Apparently, running - END TRANSACTION; - before running the entire transaction appears to work.
     I think that somehow, SQL thinks that a transaction is already occurring. 
@@ -40,10 +40,12 @@ def transfer(conn, user_a, user_b, transfer_amount):
 
         new_user_a_credit = user_a_credit - transfer_amount
         set_credit(conn, user_a, new_user_a_credit)
-
         new_user_b_credit = user_b_credit + transfer_amount
-        set_credit(conn, user_b, new_user_b_credit)
 
+        if fail: 
+            set_credit_fail(conn, user_b, new_user_b_credit)
+        else:
+            set_credit(conn, user_b, new_user_b_credit)
     except conn.Error:
         print("failed!")
         conn.execute("rollback")
