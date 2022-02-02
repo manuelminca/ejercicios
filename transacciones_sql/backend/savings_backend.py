@@ -46,7 +46,9 @@ def transfer(conn, user_a, user_b, transfer_amount, fail=False):
             set_credit_fail(conn, user_b, new_user_b_credit)
         else:
             set_credit(conn, user_b, new_user_b_credit)
+        conn.execute("commit")
     except conn.Error:
         print("failed!")
         conn.execute("rollback")
         raise conn.Error
+
