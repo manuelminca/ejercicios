@@ -1,3 +1,4 @@
+from shutil import ExecError
 import sqlite3
 
 def init_db(conn):
@@ -47,7 +48,7 @@ def transfer(conn, user_a, user_b, transfer_amount, fail=False):
         else:
             set_credit(conn, user_b, new_user_b_credit)
         conn.execute("commit")
-    except conn.Error:
+    except Exception:
         print("failed!")
         conn.execute("rollback")
         raise conn.Error
