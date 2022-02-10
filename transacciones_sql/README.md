@@ -42,4 +42,7 @@ Asegúrate de que sigue pasando los tests unitarios con `python3 -m unittest dis
 ### Cursor vs Connection
 1. The connection has one purpose: controlling access to the database.
 
-3. The cursor has one purpose: keeping track of where we are in the database so that if several programs are accessing the database at the same time, the database can keep track of who is trying to do what.
+2. The cursor has one purpose: keeping track of where we are in the database so that if several programs are accessing the database at the same time, the database can keep track of who is trying to do what.
+
+
+Depending on the underlying implementation it may be possible to generate several cursors sharing the same connection to a database. Closing the cursor should free resources associated to the query, including any results never fetched from the DB (or fetched but not used) but would not eliminate the connection to the database itself so you would be able to get a new cursor on the same database without the need to authenticate again.
