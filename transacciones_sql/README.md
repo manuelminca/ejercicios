@@ -35,3 +35,11 @@ va a insertar el dinero en el usuario 2 se pierde la conexión por la caída de 
 ¿Cómo reescribirías la función `savings_backend.transfer(conn, user_a, user_b, transfer_amount)` para eliminar el bug sin tener que cambiar a un datacenter bueno?
 
 Asegúrate de que sigue pasando los tests unitarios con `python3 -m unittest discover backend`
+
+
+
+
+### Cursor vs Connection
+1. The connection has one purpose: controlling access to the database.
+
+3. The cursor has one purpose: keeping track of where we are in the database so that if several programs are accessing the database at the same time, the database can keep track of who is trying to do what.
