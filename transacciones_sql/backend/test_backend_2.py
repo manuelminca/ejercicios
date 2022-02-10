@@ -1,50 +1,74 @@
 import unittest
 import sqlite3
-
+from contextlib import closing
 from backend.savings_backend_2 import init_db, create_user, get_credit, set_credit, transfer
 
 class Test(unittest.TestCase):
 
     def test_basic_ops(self):
-        with sqlite3.connect(':memory:') as conn:
-            init_db(conn)
+        conn = sqlite3.connect(':memory:')
+        conn.isolation_level = None
 
-            create_user(conn, 'pepe', 100)
+        with closing(conn.cursor()) as cur:
+            init_db(cur)
+            create_user(cur, 'pepe', 100)
 
-            self.assertEqual(get_credit(conn, 'pepe'), 100)
+            self.assertEqual(get_credit(cur, 'pepe'), 100)
 
     def test_successful_transfer(self):
-        with sqlite3.connect(':memory:') as conn:
-            init_db(conn)
+        conn = sqlite3.connect(':memory:')
+        conn.isolation_level = None
 
-            create_user(conn, 'pepe', 100)
-            create_user(conn, 'paco', 100)
+        try:
+            with conn:
+                with closing(conn.cursor()) as cur:
+                    init_db(cur)
 
-            transfer(conn, 'pepe', 'paco', 50)
+                    create_user(cur, 'pepe', 100)
+                    create_user(cur, 'paco', 100)
 
-            self.assertEqual(get_credit(conn, 'pepe'), 50)
-            self.assertEqual(get_credit(conn, 'paco'), 150)
+                    transfer(cur, 'pepe', 'paco', 50)
+
+                    self.assertEqual(get_credit(cur, 'pepe'), 50)
+                    self.assertEqual(get_credit(cur, 'paco'), 150)
+        except sqlite3.Error:
+            print("Rollback!")
 
     def test_insufficient_funds_transfer(self):
-        with sqlite3.connect(':memory:') as conn:
-            init_db(conn)
+        conn = sqlite3.connect(':memory:')
+        conn.isolation_level = None
 
-            create_user(conn, 'pepe', 100)
-            create_user(conn, 'paco', 100)
+        try:
+            with conn:
+                with closing(conn.cursor()) as cur:
+                    init_db(cur)
 
-            with self.assertRaises(Exception):
-                transfer(conn, 'pepe', 'paco', 1000)
+                    create_user(cur, 'pepe', 100)
+                    create_user(cur, 'paco', 100)
 
+                    with self.assertRaises(Exception):
+                        transfer(cur, 'pepe', 'paco', 1000)
+        except sqlite3.Error:
+            print("Rollback!")
 
     def test_light_cut(self):
-        with sqlite3.connect(':memory:') as conn:
-            init_db(conn)
-        
-            create_user(conn, 'pepe', 100)
-            create_user(conn, 'paco', 100)
+        conn = sqlite3.connect(':memory:')
+        conn.isolation_level = None
 
-            with self.assertRaises(Exception):
-                transfer(conn, 'pepe', 'paco', 50, True)
+        try:
+            with conn:
+                with closing(conn.cursor()) as cur:
 
-            self.assertEqual(get_credit(conn, 'pepe'), 100)
-            self.assertEqual(get_credit(conn, 'paco'), 100)
+                    init_db(cur)
+                
+                    create_user(cur, 'pepe', 100)
+                    create_user(cur, 'paco', 100)
+
+                    with self.assertRaises(Exception):
+                        transfer(cur, 'pepe', 'paco', 50, True)
+
+        except sqlite3.Error:
+            conn = sqlite3.connect(':memory:')
+            with closing(conn.cursor()) as cur:
+                self.assertEqual(get_credit(cur, 'pepe'), 100)
+                self.assertEqual(get_credit(cur, 'paco'), 100)

@@ -53,6 +53,6 @@ def transfer(conn, user_a, user_b, transfer_amount, fail=False):
         conn.execute("rollback")
         raise conn.Error
 
-    finally:
-        if conn:
-            conn.close()
+    # finally:
+    #     if conn:
+    #         conn.close()
