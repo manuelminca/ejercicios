@@ -48,8 +48,11 @@ def transfer(conn, user_a, user_b, transfer_amount, fail=False):
         else:
             set_credit(conn, user_b, new_user_b_credit)
         conn.execute("commit")
-    except Exception:
-        print("failed!")
+
+    except sqlite3.Error:
         conn.execute("rollback")
         raise conn.Error
 
+    finally:
+        if conn:
+            conn.close()
