@@ -36,6 +36,7 @@ def transfer(cur, user_a, user_b, transfer_amount, fail=False):
 
     if fail: 
         set_credit_fail(cur, user_b, new_user_b_credit)
+        print("no deberia entrar")
     else:
         set_credit(cur, user_b, new_user_b_credit)
 

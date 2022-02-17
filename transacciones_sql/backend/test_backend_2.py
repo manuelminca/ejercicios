@@ -7,7 +7,6 @@ class Test(unittest.TestCase):
 
     def test_basic_ops(self):
         conn = sqlite3.connect(':memory:')
-        conn.isolation_level = None
 
         with closing(conn.cursor()) as cur:
             init_db(cur)
@@ -17,7 +16,6 @@ class Test(unittest.TestCase):
 
     def test_successful_transfer(self):
         conn = sqlite3.connect(':memory:')
-        conn.isolation_level = None
 
         try:
             with conn:
@@ -36,7 +34,6 @@ class Test(unittest.TestCase):
 
     def test_insufficient_funds_transfer(self):
         conn = sqlite3.connect(':memory:')
-        conn.isolation_level = None
 
         try:
             with conn:
@@ -53,22 +50,36 @@ class Test(unittest.TestCase):
 
     def test_light_cut(self):
         conn = sqlite3.connect(':memory:')
-        conn.isolation_level = None
+        cur = conn.cursor()
+        init_db(cur)
+        create_user(cur, 'pepe', 100)
+        create_user(cur, 'paco', 100)
 
         try:
-            with conn:
-                with closing(conn.cursor()) as cur:
+            with cur:
+                with self.assertRaises(Exception):
+                    transfer(cur, 'pepe', 'paco', 50, True)
+                raise Exception
+        except:
+            pass
+        
+        self.assertEqual(get_credit(cur, 'pepe'), 100)       
+        self.assertEqual(get_credit(cur, 'paco'), 100)
 
-                    init_db(cur)
-                
-                    create_user(cur, 'pepe', 100)
-                    create_user(cur, 'paco', 100)
+    def test_quick(self):
+        conn = sqlite3.connect(':memory:')
+        cur = conn.cursor()
+        init_db(cur)
+        create_user(cur, 'pepe', 100)
 
-                    with self.assertRaises(Exception):
-                        transfer(cur, 'pepe', 'paco', 50, True)
+        try:
+            with cur:
+                set_credit(cur, 'pepe', 500)
 
-        except sqlite3.Error:
-            conn = sqlite3.connect(':memory:')
-            with closing(conn.cursor()) as cur:
-                self.assertEqual(get_credit(cur, 'pepe'), 100)
-                self.assertEqual(get_credit(cur, 'paco'), 100)
+                raise Exception
+        except:
+            pass
+        
+        cur.execute("select * from savings")
+        print(cur.fetchone())
+        
